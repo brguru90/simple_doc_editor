@@ -8,7 +8,8 @@ export default class blog extends Component {
 
     state = {
         modal_open: false,
-        data: []
+        data: [],
+        filtered: []
     }
 
 
@@ -21,7 +22,9 @@ export default class blog extends Component {
         console.log(Object.entries(localStorage))
 
         setImmediate(() => {
-            this.setState({ data: Object.keys(localStorage).filter(key => key.startsWith("blog_")).map(key=>key.replace("blog_:", "")) })
+            const data = Object.keys(localStorage).filter(key => key.startsWith("blog_")).map(key => key.replace("blog_:", ""))
+            this.setState({ data: data, filtered: data })
+
         })
 
     }
@@ -62,11 +65,21 @@ export default class blog extends Component {
             <div className="blog">
 
                 <Divider orientation="left">Blogs</Divider>
+                <Input size="large" placeholder="Search by blog name" onChange={e => {
+                    console.log(e.target.value)
+                    if (e.target.value.trim() == "") {
+                        this.setState({ filtered: this.state.data})
+                    }
+                    else {
+                        this.setState({ filtered: this.state.data.filter(name => name.includes(e.target.value)) })
+                    }
+                }} />
+                <br /><br />
                 <List
                     size="small"
                     bordered
-                    dataSource={this.state.data}
-                    renderItem={item => <List.Item onClick={e=> window.location.assign("#/new_blog/:" + item)}>{item}</List.Item>}
+                    dataSource={this.state.filtered}
+                    renderItem={item => <List.Item onClick={e => window.location.assign("#/new_blog/:" + item)}>{item}</List.Item>}
                 />
                 <br />
                 <Button type="primary" onClick={e => this.setState({ modal_open: true })}>New Blog</Button>
